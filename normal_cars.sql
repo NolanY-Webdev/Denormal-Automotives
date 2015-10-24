@@ -67,13 +67,45 @@ FROM makes, models, year, car_models
     AND models.model_title = car_models.model_title
       AND models.model_code = car_models.model_code
     AND year.id = car_models.year;
+
 -- 1. In `normal.sql` Create a query to get a list of all `make_title` values in the `car_models` table. (should have 71 results)
+SELECT DISTINCT make_title
+FROM normalized
+INNER JOIN makes
+ON makes.id = normalized.make_id;
 
 
 -- 1. In `normal.sql` Create a query to list all `model_title` values where the `make_code` is `'VOLKS'` (should have 27 results)
-
+SELECT DISTINCT model_title
+FROM normalized
+INNER JOIN makes
+on makes.id = normalized.make_id
+INNER JOIN models
+ON normalized.model_id = models.id
+WHERE makes.make_code = 'VOLKS';
 
 -- 1. In `normal.sql` Create a query to list all `make_code`, `model_code`, `model_title`, and year from `car_models` where the `make_code` is `'LAM'` (should have 136 rows)
+-- SELECT DISTINCT make_code, model_code, model_title, year
+-- FROM normalized
+-- INNER JOIN makes
+-- ON makes.id = normalized.make_id
+-- INNER JOIN models
+-- ON normalized.model_id = models.id
+-- WHERE makes.make_code = 'LAM';
 
+SELECT DISTINCT cm.make_code AS make, cd.model_code AS model, cd.model_title AS title, year
+FROM normalized AS cn
+INNER JOIN makes cm
+ON cn.make_id = cm.id
+INNER JOIN models cd
+ON cn.model_id = cd.id
+WHERE cm.make_code = 'LAM';
 
 -- 1. In `normal.sql` Create a query to list all fields from all `car_models` in years between `2010` and `2015` (should have 7884 rows)
+SELECT DISTINCT *
+FROM normalized
+INNER JOIN makes
+on makes.id = normalized.make_id
+INNER JOIN models
+ON normalized.model_id = models.id
+WHERE year BETWEEN 2010 and 2015;
