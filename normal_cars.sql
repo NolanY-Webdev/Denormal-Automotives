@@ -2,11 +2,15 @@
 -- Write your queries in `normalized.sql` when instructed to.
 
 -- 1. Create a new postgres user named `normal_user`
-
-
+\c EnemyBoss;
+DROP DATABASE IF EXISTS normal_cars;
+DROP USER IF EXISTS normal_user;
+CREATE USER normal_user;
+DROP TABLE IF EXISTS car_models;
 -- 1. Create a new database named `normal_cars` owned by `normal_user`
-
-
+CREATE DATABASE normal_cars OWNER normal_user;
+\c normal_cars;
+\i ./scripts/denormal_data.sql;
 -- 1. Whiteboard your solution to normalizing the `denormal_cars` schema.
 
 
@@ -15,10 +19,54 @@
 
 -- 1. In `normalized.sql` Create a query to generate the tables needed to accomplish your normalized schema, including any primary and foreign key constraints. Logical renaming of columns is allowed.
 
+CREATE TABLE IF NOT EXISTS makes
+(
+  id serial PRIMARY KEY,
+  make_title character varying(125) NOT NULL,
+  make_code character varying(125) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS models
+(
+  id serial PRIMARY KEY,
+  model_title character varying(125) NOT NULL,
+  model_code character varying(125) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS year
+(
+  id int PRIMARY KEY NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS normalized
+(
+  id serial PRIMARY KEY,
+  make_id integer REFERENCES makes (id) NOT NULL,
+  model_id integer REFERENCES models (id) NOT NULL,
+  year integer REFERENCES year (id) NOT NULL
+);
 
 -- 1. Using the resources that you now possess, In `normal.sql` Create queries to insert **all** of the data that was in the `denormal_cars.car_models` table, into the new normalized tables of the `normal_cars` database.
+INSERT INTO makes (make_title, make_code)
+SELECT DISTINCT make_title, make_code
+FROM car_models;
 
+INSERT INTO models (model_title, model_code)
+SELECT DISTINCT model_title, model_code
+FROM car_models;
 
+INSERT INTO year (id)
+SELECT DISTINCT year
+FROM car_models;
+
+INSERT INTO normalized (make_id, model_id, year)
+SELECT makes.id, models.id, year.id
+FROM makes, models, year, car_models
+  WHERE makes.make_title = car_models.make_title
+      AND makes.make_code = car_models.make_code
+    AND models.model_title = car_models.model_title
+      AND models.model_code = car_models.model_code
+    AND year.id = car_models.year;
 -- 1. In `normal.sql` Create a query to get a list of all `make_title` values in the `car_models` table. (should have 71 results)
 
 
